@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Illustrator Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #ff5c35;
+    --accent2: #a259ff;
+    --accent3: #00d4ff;
+    --text: #f0f0f8;
+    --muted: #6b6b88;
+    --success: #00c896;
+    --danger: #ff4466;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif; min-height: 100vh;
+  }
+
+  /* LOGIN SCREEN */
+  #loginScreen {
+    min-height: 100vh; display: flex;
+    align-items: center; justify-content: center; padding: 2rem;
+  }
+  .login-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 380px;
+    text-align: center;
+  }
+  .login-box h1 {
+    font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.25rem;
+  }
+  .login-box p { color: var(--muted); font-size: 0.875rem; margin-bottom: 2rem; }
+  .login-box input {
+    width: 100%; padding: 0.75rem 1rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 1rem;
+    outline: none; text-align: center; letter-spacing: 0.2em;
+    margin-bottom: 1rem; transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--accent2); }
+  .login-error { color: var(--danger); font-size: 0.8rem; margin-bottom: 0.75rem; display: none; }
+
+  /* MAIN APP */
+  #app { display: none; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    padding: 0 2rem; height: 72px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px); background: rgba(10,10,15,0.9);
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.05em;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .logo span {
+    display: block; -webkit-text-fill-color: var(--accent);
+    font-size: 0.7rem; letter-spacing: 0.2em;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; line-height: 1; margin-top: -4px;
+  }
+  .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 0.5rem 1.25rem; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--muted); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #ff3a1a); color: white; box-shadow: 0 4px 20px rgba(255,92,53,0.3); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255,92,53,0.45); }
+  .btn-success { background: var(--success); color: #000; font-weight: 600; }
+  .btn-success:hover { filter: brightness(1.1); }
+  .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* LAYOUT */
+  .admin-layout {
+    display: grid; grid-template-columns: 1fr 380px;
+    gap: 2rem; padding: 2rem; max-width: 1400px; margin: 0 auto;
+  }
+
+  @media (max-width: 900px) {
+    .admin-layout { grid-template-columns: 1fr; }
+  }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .section-header h2 {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    letter-spacing: 0.05em; color: var(--text);
+  }
+
+  /* TUTORIAL LIST */
+  .tutorial-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .tutorial-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem;
+    transition: border-color 0.2s;
+  }
+  .tutorial-item:hover { border-color: var(--border); }
+  .tutorial-item.editing { border-color: var(--accent2); }
+
+  .item-thumb {
+    width: 80px; height: 45px; border-radius: 6px;
+    object-fit: cover; background: var(--surface2); flex-shrink: 0;
+  }
+
+  .item-info { flex: 1; min-width: 0; }
+  .item-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-meta { color: var(--muted); font-size: 0.75rem; margin-top: 0.2rem; display: flex; gap: 0.75rem; }
+  .meta-pill {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.1rem 0.5rem; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+  }
+  .meta-pill.has-steps { background: rgba(0,200,150,0.15); color: var(--success); }
+  .meta-pill.no-steps { background: rgba(107,107,136,0.15); color: var(--muted); }
+
+  .item-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+  /* DRAG HANDLE */
+  .drag-handle {
+    cursor: grab; color: var(--muted); flex-shrink: 0;
+    display: flex; align-items: center; padding: 0 0.25rem;
+  }
+  .drag-handle:active { cursor: grabbing; }
+
+  /* ORDER BADGE */
+  .order-badge {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* FORM PANEL */
+  .form-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.5rem;
+    position: sticky; top: 90px;
+    max-height: calc(100vh - 110px); overflow-y: auto;
+  }
+
+  .form-panel h2 {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    letter-spacing: 0.05em; margin-bottom: 0.25rem;
+  }
+  .form-panel .form-subtitle { color: var(--muted); font-size: 0.8rem; margin-bottom: 1.5rem; }
+
+  .form-group { margin-bottom: 1.1rem; }
+  .form-group label {
+    display: block; font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.4rem;
+  }
+  .form-group input, .form-group textarea {
+    width: 100%; padding: 0.65rem 0.9rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+    outline: none; transition: border-color 0.2s; resize: vertical;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--accent2); }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: var(--muted); }
+
+  .form-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.35rem; }
+
+  /* STEPS EDITOR */
+  .steps-editor { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .step-row {
+    display: flex; gap: 0.5rem; align-items: flex-start;
+  }
+  .step-number {
+    width: 24px; height: 32px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: var(--accent2);
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step-row input {
+    flex: 1; padding: 0.45rem 0.75rem !important;
+    font-size: 0.825rem !important;
+  }
+  .step-remove {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; padding: 0.35rem; border-radius: 6px;
+    transition: color 0.2s; flex-shrink: 0; margin-top: 2px;
+  }
+  .step-remove:hover { color: var(--danger); }
+
+  .add-step-btn {
+    background: var(--surface2); border: 1px dashed var(--border);
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem; padding: 0.5rem; border-radius: 8px;
+    cursor: pointer; width: 100%; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  }
+  .add-step-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .form-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+  .form-actions .btn { flex: 1; justify-content: center; padding: 0.7rem; }
+
+  /* THUMB PREVIEW */
+  .thumb-preview {
+    width: 100%; aspect-ratio: 16/9; border-radius: 8px;
+    object-fit: cover; background: var(--surface2);
+    border: 1px solid var(--border); margin-top: 0.5rem;
+    display: none;
+  }
+  .thumb-preview.visible { display: block; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    border-radius: 10px; padding: 0.75rem 1.25rem;
+    font-size: 0.875rem; z-index: 200; animation: fadeUp 0.3s ease;
+    max-width: 320px; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .toast.success { background: var(--surface2); border: 1px solid var(--success); color: var(--success); }
+  .toast.error { background: var(--surface2); border: 1px solid var(--danger); color: var(--danger); }
+  .toast.info { background: var(--surface2); border: 1px solid var(--accent2); color: var(--text); }
+
+  /* EMPTY */
+  .empty-list {
+    text-align: center; padding: 3rem 1rem;
+    color: var(--muted); border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+
+  /* CONFIRM DIALOG */
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px); z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 2rem;
+  }
+  .confirm-overlay.open { display: flex; }
+  .confirm-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2rem; max-width: 360px; width: 100%; text-align: center;
+  }
+  .confirm-box h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .confirm-box p { color: var(--muted); font-size: 0.875rem; margin-bottom: 1.5rem; }
+  .confirm-actions { display: flex; gap: 0.75rem; }
+  .confirm-actions .btn { flex: 1; justify-content: center; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Admin</h1>
+    <p>Illustrator Lab — Teacher Access</p>
+    <input type="password" id="passwordInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+    <div class="login-error" id="loginError">Incorrect password. Try again.</div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.75rem" onclick="login()">
+      Enter
+    </button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header>
+    <div class="logo">
+      Illustrator Lab
+      <span>ADMIN PANEL</span>
+    </div>
+    <div class="header-actions">
+      <a href="index.html" target="_blank" class="btn btn-ghost" style="text-decoration:none">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+        </svg>
+        View Site
+      </a>
+      <button class="btn btn-ghost" onclick="logout()">Log Out</button>
+    </div>
+  </header>
+
+  <div class="admin-layout">
+    <!-- LEFT: Tutorial List -->
+    <div>
+      <div class="section-header">
+        <h2>Tutorials (<span id="tutorialCount">0</span>)</h2>
+        <button class="btn btn-primary btn-sm" onclick="newTutorial()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Tutorial
+        </button>
+      </div>
+      <div class="tutorial-list" id="tutorialList">
+        <div class="empty-list">Loading tutorials...</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Form Panel -->
+    <div class="form-panel" id="formPanel">
+      <h2 id="formTitle">New Tutorial</h2>
+      <p class="form-subtitle" id="formSubtitle">Fill in the details below and click Save.</p>
+
+      <input type="hidden" id="editingId">
+
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" id="fTitle" placeholder="e.g. Amazing Gradient Line Effect">
+      </div>
+
+      <div class="form-group">
+        <label>YouTube URL</label>
+        <input type="url" id="fUrl" placeholder="https://youtube.com/shorts/..." oninput="onUrlInput()">
+        <div class="form-hint" id="urlHint"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Thumbnail URL <span style="font-size:0.65rem">(optional — auto-fetched from YouTube)</span></label>
+        <input type="url" id="fThumb" placeholder="Leave blank to auto-detect" oninput="updateThumbPreview()">
+        <img id="thumbPreview" class="thumb-preview" alt="Thumbnail preview">
+      </div>
+
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" id="fOrder" placeholder="1" min="1" value="1">
+        <div class="form-hint">Lower numbers appear first on the student site.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Step-by-Step Directions</label>
+        <div class="steps-editor" id="stepsEditor"></div>
+        <button class="add-step-btn" onclick="addStep()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Step
+        </button>
+        <div class="form-hint">Add each step of the tutorial. Students will see these below the video card.</div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        <button class="btn btn-success" id="saveBtn" onclick="saveTutorial()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Save Tutorial
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>Delete Tutorial?</h3>
+    <p id="confirmMsg">This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmYes">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, onSnapshot, query, orderBy,
+    doc, setDoc, addDoc, deleteDoc, updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCEGFBAV_6dg8iLwdDseTlvo9ftXOmqho8",
+    authDomain: "illustrator-lab.firebaseapp.com",
+    projectId: "illustrator-lab",
+    storageBucket: "illustrator-lab.firebasestorage.app",
+    messagingSenderId: "3914415612",
+    appId: "1:3914415612:web:20d780248147b5f5344679"
+  };
+
+  const ADMIN_PASSWORD = "illustratorlab2024";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let allTutorials = [];
+  let stepCount = 0;
+
+  // ── AUTH ──
+  window.login = function() {
+    const pw = document.getElementById('passwordInput').value;
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      initAdmin();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('passwordInput').value = '';
+    }
+  };
+
+  window.logout = function() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('passwordInput').value = '';
+  };
+
+  // ── INIT ──
+  function initAdmin() {
+    const q = query(collection(db, 'tutorials'), orderBy('order', 'asc'));
+    onSnapshot(q, (snapshot) => {
+      allTutorials = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderList();
+    });
+    newTutorial();
+  }
+
+  // ── RENDER LIST ──
+  function renderList() {
+    const list = document.getElementById('tutorialList');
+    document.getElementById('tutorialCount').textContent = allTutorials.length;
+
+    if (allTutorials.length === 0) {
+      list.innerHTML = `<div class="empty-list">No tutorials yet. Add your first one →</div>`;
+      return;
+    }
+
+    list.innerHTML = allTutorials.map((t, i) => {
+      const videoId = t.videoId || extractVideoId(t.url);
+      const thumb = t.thumb || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : '');
+      const hasSteps = t.steps && t.steps.length > 0;
+      return `
+      <div class="tutorial-item" id="item-${t.id}">
+        <div class="order-badge">${i + 1}</div>
+        ${thumb ? `<img class="item-thumb" src="${thumb}" onerror="this.style.display='none'">` : `<div class="item-thumb"></div>`}
+        <div class="item-info">
+          <div class="item-title">${t.title}</div>
+          <div class="item-meta">
+            <span class="meta-pill ${hasSteps ? 'has-steps' : 'no-steps'}">
+              ${hasSteps ? `✓ ${t.steps.length} steps` : '○ No steps'}
+            </span>
+            ${t.url ? `<span style="color:var(--muted);font-size:0.7rem">Has URL</span>` : ''}
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editTutorial('${t.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${t.id}', '${t.title.replace(/'/g, "\\'")}')">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── FORM ──
+  window.newTutorial = function() {
+    document.getElementById('editingId').value = '';
+    document.getElementById('formTitle').textContent = 'New Tutorial';
+    document.getElementById('formSubtitle').textContent = 'Fill in the details below and click Save.';
+    document.getElementById('fTitle').value = '';
+    document.getElementById('fUrl').value = '';
+    document.getElementById('fThumb').value = '';
+    document.getElementById('fOrder').value = allTutorials.length + 1;
+    document.getElementById('urlHint').textContent = '';
+    document.getElementById('thumbPreview').classList.remove('visible');
+    document.querySelectorAll('.tutorial-item').forEach(el => el.classList.remove('editing'));
+    stepCount = 0;
+    document.getElementById('stepsEditor').innerHTML = '';
+    addStep();
+  };
+
+  window.clearForm = newTutorial;
+
+  window.editTutorial = function(id) {
+    const t = allTutorials.find(x => x.id === id);
+    if (!t) return;
+
+    document.getElementById('editingId').value = id;
+    document.getElementById('formTitle').textContent = 'Edit Tutorial';
+    document.getElementById('formSubtitle').textContent = `Editing: ${t.title}`;
+    document.getElementById('fTitle').value = t.title || '';
+    document.getElementById('fUrl').value = t.url || '';
+    document.getElementById('fThumb').value = t.thumb || '';
+    document.getElementById('fOrder').value = t.order || 1;
+    document.getElementById('urlHint').textContent = '';
+    updateThumbPreview();
+    onUrlInput();
+
+    // Highlight editing item
+    document.querySelectorAll('.tutorial-item').forEach(el => el.classList.remove('editing'));
+    const item = document.getElementById(`item-${id}`);
+    if (item) { item.classList.add('editing'); item.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+    // Load steps
+    stepCount = 0;
+    document.getElementById('stepsEditor').innerHTML = '';
+    const steps = t.steps || [];
+    if (steps.length === 0) { addStep(); }
+    else { steps.forEach(s => addStep(s)); }
+
+    // Scroll form into view on mobile
+    document.getElementById('formPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  window.saveTutorial = async function() {
+    const title = document.getElementById('fTitle').value.trim();
+    if (!title) { showToast('Please enter a title', 'error'); return; }
+
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const url = document.getElementById('fUrl').value.trim();
+    const thumb = document.getElementById('fThumb').value.trim();
+    const order = parseInt(document.getElementById('fOrder').value) || 1;
+    const videoId = extractVideoId(url);
+
+    // Collect steps
+    const stepInputs = document.querySelectorAll('.step-input');
+    const steps = Array.from(stepInputs).map(i => i.value.trim()).filter(s => s.length > 0);
+
+    const data = { title, url, thumb, videoId: videoId || '', order, steps, updatedAt: new Date().toISOString() };
+
+    try {
+      const editingId = document.getElementById('editingId').value;
+      if (editingId) {
+        await updateDoc(doc(db, 'tutorials', editingId), data);
+        showToast(`✓ "${title}" updated!`, 'success');
+      } else {
+        data.createdAt = new Date().toISOString();
+        await addDoc(collection(db, 'tutorials'), data);
+        showToast(`✓ "${title}" added!`, 'success');
+        newTutorial();
+      }
+    } catch (err) {
+      showToast('Error saving: ' + err.message, 'error');
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Tutorial`;
+  };
+
+  // ── STEPS ──
+  window.addStep = function(value = '') {
+    stepCount++;
+    const editor = document.getElementById('stepsEditor');
+    const row = document.createElement('div');
+    row.className = 'step-row';
+    row.dataset.step = stepCount;
+    row.innerHTML = `
+      <div class="step-number">${editor.children.length + 1}</div>
+      <input type="text" class="step-input" placeholder="Step description..." value="${value.replace(/"/g, '&quot;')}">
+      <button class="step-remove" onclick="removeStep(this)" title="Remove step">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>`;
+    editor.appendChild(row);
+    renumberSteps();
+  };
+
+  window.removeStep = function(btn) {
+    btn.closest('.step-row').remove();
+    renumberSteps();
+  };
+
+  function renumberSteps() {
+    document.querySelectorAll('.step-row').forEach((row, i) => {
+      row.querySelector('.step-number').textContent = i + 1;
+    });
+  }
+
+  // ── URL / THUMB ──
+  window.onUrlInput = function() {
+    const url = document.getElementById('fUrl').value;
+    const videoId = extractVideoId(url);
+    const hint = document.getElementById('urlHint');
+    if (videoId) {
+      hint.innerHTML = `<span style="color:var(--success)">✓ Video ID: ${videoId}</span>`;
+      if (!document.getElementById('fThumb').value) {
+        const autoThumb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        const preview = document.getElementById('thumbPreview');
+        preview.src = autoThumb;
+        preview.classList.add('visible');
+      }
+    } else {
+      hint.textContent = url ? '⚠ Could not detect video ID' : '';
+    }
+  };
+
+  window.updateThumbPreview = function() {
+    const thumb = document.getElementById('fThumb').value.trim();
+    const preview = document.getElementById('thumbPreview');
+    if (thumb) { preview.src = thumb; preview.classList.add('visible'); }
+    else {
+      const url = document.getElementById('fUrl').value;
+      const videoId = extractVideoId(url);
+      if (videoId) { preview.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; preview.classList.add('visible'); }
+      else { preview.classList.remove('visible'); }
+    }
+  };
+
+  // ── DELETE ──
+  let deleteTarget = null;
+
+  window.confirmDelete = function(id, title) {
+    deleteTarget = id;
+    document.getElementById('confirmMsg').textContent = `Delete "${title}"? This cannot be undone.`;
+    document.getElementById('confirmOverlay').classList.add('open');
+    document.getElementById('confirmYes').onclick = async () => {
+      await deleteDoc(doc(db, 'tutorials', id));
+      closeConfirm();
+      showToast('Tutorial deleted', 'info');
+      newTutorial();
+    };
+  };
+
+  window.closeConfirm = function() {
+    document.getElementById('confirmOverlay').classList.remove('open');
+    deleteTarget = null;
+  };
+
+  // ── HELPERS ──
+  function extractVideoId(url) {
+    if (!url) return null;
+    const patterns = [
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+      /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+    return null;
+  }
+
+  function showToast(msg, type = 'info') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const icons = { success: '✓', error: '✕', info: '•' };
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${icons[type]}</span> ${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 350); }, 3000);
+  }
+
+  // Seed initial tutorials if Firestore is empty
+  async function seedIfEmpty(snapshot) {
+    if (!snapshot.empty) return;
+    const initialData = [
+      { title: "Amazing Gradient Line Effect", url: "https://youtube.com/shorts/Pk8doFXXjjI?si=n4ihc3jcWnZhGFOz", videoId: "Pk8doFXXjjI", thumb: "", order: 1, steps: [], createdAt: new Date().toISOString() },
+      { title: "Text into Shape (Bear)", url: "https://youtube.com/shorts/0Pgr2MtLfOE?si=OJgbLYcvb1ovG8_K", videoId: "0Pgr2MtLfOE", thumb: "", order: 2, steps: [], createdAt: new Date().toISOString() },
+      { title: "Text into Shape (Flag)", url: "https://youtube.com/shorts/q9sBMXXfkYE?si=mXPa6jUowUXYHEIL", videoId: "q9sBMXXfkYE", thumb: "", order: 3, steps: [], createdAt: new Date().toISOString() },
+      { title: "Quick Flower with Gradient", url: "https://youtube.com/shorts/8eghHiSNdQ4?si=fYGWecA1EgW1F15L", videoId: "8eghHiSNdQ4", thumb: "", order: 4, steps: [], createdAt: new Date().toISOString() },
+      { title: "Dashed Line Effect", url: "https://youtube.com/shorts/oI7Xn8Cl5Ds?si=QIjNs98H1eLj0Vmq", videoId: "oI7Xn8Cl5Ds", thumb: "", order: 5, steps: [], createdAt: new Date().toISOString() },
+      { title: "Fit Text into Shape (Nike)", url: "https://youtube.com/shorts/a3z2bczue50?si=ShKFm2UcFys9Gtsu", videoId: "a3z2bczue50", thumb: "", order: 6, steps: [], createdAt: new Date().toISOString() },
+      { title: "Drawing with the Tilde (~) Key", url: "https://youtube.com/shorts/8PGLfDmMiAw?si=LniIPE_uLsBq9s46", videoId: "8PGLfDmMiAw", thumb: "", order: 7, steps: [], createdAt: new Date().toISOString() },
+      { title: "3D Clouds (longer tutorial)", url: "https://youtu.be/-ZoDHEsd0Y4?si=imRG83vzSnQqqU2c", videoId: "-ZoDHEsd0Y4", thumb: "", order: 8, steps: [], createdAt: new Date().toISOString() },
+    ];
+    for (const t of initialData) { await addDoc(collection(db, 'tutorials'), t); }
+  }
+
+  // Check and seed on first admin load
+  const unsubSeed = onSnapshot(query(collection(db, 'tutorials')), async (snap) => {
+    await seedIfEmpty(snap);
+    unsubSeed();
+  });
+</script>
+</body>
+</html>
